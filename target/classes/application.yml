@@ -1,0 +1,33 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: document-service
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    initialization-mode: never
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+app:
+  jwtSecret: test-secret-for-dev
+  services:
+    storage:
+      url: http://localhost:8083
+      enabled: false
+
+logging:
+  level:
+    org.springframework: INFO
+    com.service.document: DEBUG
