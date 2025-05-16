@@ -11,8 +11,11 @@ import com.example.auth_service.util.RoleUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -81,28 +84,35 @@ public class UserController {
         return ResponseEntity.ok(userRepository.save(applyUpdates(user, userUpdateDTO)));
     }
 
-    // Update User (by SuperAdmin or Admin)
-    @PutMapping("/user/{userId}")
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
     public ResponseEntity<User> updateUser(
-            @PathVariable Long userId,
-            @RequestBody UpdateUserDTO userUpdateDTO,
-            @AuthenticationPrincipal UserDetails currentUser) {
-        
-        if (!RoleUtils.isSuperAdmin(currentUser) && !RoleUtils.isAdmin(currentUser)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
-                "Only SUPERADMIN or ADMIN can update USERs");
+        @PathVariable Long userId,
+        @RequestBody UpdateUserDTO updates,
+        @AuthenticationPrincipal UserDetails currentUser) {
+
+        User targetUser = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Check permissions
+        if (!RoleUtils.isSuperAdmin(currentUser)) {
+            // If current user is ADMIN, can only update USERs
+            if (!RoleUtils.isAdmin(currentUser) || 
+                !targetUser.getRole().getName().equals(Role.RoleType.USER)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
+                    "You can only update regular users");
+            }
         }
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        // Apply updates
+        updates.getName().ifPresent(targetUser::setName);
+        updates.getEmail().ifPresent(targetUser::setEmail);
+        updates.getPosition().ifPresent(targetUser::setPosition);
+        updates.getAddress().ifPresent(targetUser::setAddress);
+        updates.getPhone().ifPresent(targetUser::setPhone);
 
-        // Verify the target user is a regular USER
-        if (!user.getRole().getName().equals(Role.RoleType.USER)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
-                "This endpoint is only for USER updates");
-        }
-
-        return ResponseEntity.ok(userRepository.save(applyUpdates(user, userUpdateDTO)));
+        User updatedUser = userRepository.save(targetUser);
+        return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping("/{userId}")
@@ -136,5 +146,27 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/getallusers")
+    public ResponseEntity<List<User>> getAllUsers() {
+        // Add any permission checks if needed
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+
+
+
+    // Add this method to UserController.java
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUserById(
+        @PathVariable Long userId,
+        @AuthenticationPrincipal UserDetails currentUser) {
+        
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return ResponseEntity.ok(user);
+    }
+
 
 }
+
+
+

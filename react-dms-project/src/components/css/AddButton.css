@@ -1,0 +1,33 @@
+/* src/components/css/AddUserButton.css */
+.floating-add-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #9297ec30; /* Red color */
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000; /* Ensure it stays above other content */
+}
+
+.floating-add-button:hover {
+  background-color: #9296ec; /* Darker red on hover */
+  transform: scale(1.1);
+}
+
+.floating-add-button:active {
+  transform: scale(0.95);
+}
+
+.plus-icon {
+  font-size: 24px;
+  stroke-width: 3px;
+}

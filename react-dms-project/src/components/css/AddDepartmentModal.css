@@ -1,0 +1,149 @@
+/* src/components/css/AddDepartmentModal.css */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.543); /* Darker background */
+  display: flex;
+  align-items: flex-start; /* Changed from center to flex-end */
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+  padding-bottom: 5%; /* Add some space at bottom */
+}
+
+.modal-content {
+  height: auto;
+  background-color: #242424;
+  border-radius: 8px 8px 8px 8px; /* Rounded top only */
+  width: 100%;
+  max-width: 500px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 2rem;
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3); /* Shadow at top */
+  animation: slideUp 0.3s ease-out forwards;
+  position: relative;
+  border: 1px solid #9296ec;
+  margin-bottom: auto; /* Push to bottom */
+  transform: translateY(0); /* Remove initial transform */
+}
+
+/* New animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(100%); /* Start below viewport */
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1;
+  }
+}
+
+
+.modal-header h2 {
+  color: #ffffff;
+  margin-bottom: 10;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.modal-header p {
+  color: #666666;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: rgba(190, 190, 190, 0.345);
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: color 0.2s;
+}
+
+.close-button:hover {
+  color: #ffffff;
+}
+
+.input-group {
+  margin-bottom: 1.25rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+}
+
+.input-group input,
+.role-select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid hsl(238, 68%, 85%);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s;
+  background-color: #242424;
+}
+
+.role-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+.input-group input:focus,
+.role-select:focus {
+  outline: none;
+  border-color: #9296ec;
+  background-color: #242424;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #9296ec;
+  color: #242424;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.submit-button:hover {
+  background-color: #9296ec;
+}
+
+.submit-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  background-color: #f8d7da;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  border: 1px solid #f5c6cb;
+}
+
+

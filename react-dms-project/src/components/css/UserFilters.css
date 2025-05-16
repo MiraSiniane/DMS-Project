@@ -1,0 +1,64 @@
+/* src/components/css/UserFilters.css */
+.user-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.user-filters select {
+  padding: 8px 12px;
+  border: 1px solid #9296ec;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #333;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
+.user-filters select:focus {
+  outline: none;
+  box-shadow: #9297ec7e;
+}
+
+.user-filters input {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 160px;
+  transition: all 0.2s ease;
+}
+
+.user-filters input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.user-filters input::placeholder {
+  color: #999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .user-filters select,
+  .user-filters input {
+    width: 100%;
+    min-width: auto;
+  }
+}

@@ -1,0 +1,66 @@
+/* src/pages/UserDetails.css */
+.user-details-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.back-button {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #9296ec;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.user-details-card {
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0);
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+}
+
+.detail-label {
+  width: 150px;
+  color: #9296ec;
+}
+
+.detail-value {
+  flex: 1;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-dot.active {
+  background-color: #4CAF50;
+}
+
+.status-dot.inactive {
+  background-color: #9E9E9E;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+}
+
+.error {
+  padding: 20px;
+  text-align: center;
+  color: #d32f2f;
+}

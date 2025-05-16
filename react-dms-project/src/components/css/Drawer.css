@@ -1,0 +1,65 @@
+/* src/components/Drawer.css */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 280px;
+  height: 100vh;
+  background-color: #2a2a2a;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  transition: left 0.3s ease-in-out;
+}
+
+.drawer.open {
+  left: 0;
+}
+
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.drawer-header h3 {
+  margin: 0;
+  color: #fff;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.drawer-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.drawer-nav li a {
+  display: block;
+  padding: 1rem;
+  color: #ddd;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.drawer-nav li a:hover {
+  background-color: #333;
+}

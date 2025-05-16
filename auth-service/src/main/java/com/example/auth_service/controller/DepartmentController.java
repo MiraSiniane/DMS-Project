@@ -1,16 +1,25 @@
 package com.example.auth_service.controller;
 
 import com.example.auth_service.dto.DepartmentAssignmentDTO;
+import com.example.auth_service.dto.DepartmentListDTO;
 import com.example.auth_service.model.Department;
+import com.example.auth_service.model.Role;
 import com.example.auth_service.model.User;
 import com.example.auth_service.repository.DepartmentRepository;
 import com.example.auth_service.repository.UserRepository;
+import com.example.auth_service.service.DepartmentService;
 import com.example.auth_service.util.RoleUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -65,41 +74,26 @@ public class DepartmentController {
 
     @PostMapping("/assign")
     public ResponseEntity<User> assignDepartment(
-            @RequestBody DepartmentAssignmentDTO assignment,
-            @AuthenticationPrincipal UserDetails currentUser) {
+        @RequestBody DepartmentAssignmentDTO assignment,
+        @AuthenticationPrincipal UserDetails currentUser) {
         
         User user = userRepository.findById(assignment.getUserId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         Department department = departmentRepository.findById(assignment.getDepartmentId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         
-        // Debug: Print user's role
-        System.out.println("Target user role: " + user.getRole().getName());
+        boolean isSuperAdmin = RoleUtils.isSuperAdmin(currentUser);
+        boolean isAdmin = RoleUtils.isAdmin(currentUser);
+        boolean targetIsUser = user.getRole().getName().equals(Role.RoleType.USER);
         
-        // Check permissions
-        boolean isSuperAdmin = currentUser.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_SUPERADMIN"));
-        
-        boolean isAdmin = currentUser.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-        
-        boolean targetIsUser = user.getRole().getName().toString().trim().equalsIgnoreCase("USER");
-
         if (!isSuperAdmin && !(isAdmin && targetIsUser)) {
-                        System.out.println(isSuperAdmin);
-                        System.out.println(isAdmin);
-                        System.out.println(targetIsUser);
-                        System.out.println(user.getRole().getName());
-
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                 "Permission denied. Admins can only assign to regular users.");
-            
         }
         
         user.getDepartments().add(department);
         return ResponseEntity.ok(userRepository.save(user));
-    }
+   }
 
     // Remove department from user
     @PostMapping("/unassign")
@@ -116,8 +110,7 @@ public class DepartmentController {
         // Check permissions
         boolean isSuperAdmin = RoleUtils.isSuperAdmin(currentUser);
         boolean isAdmin = RoleUtils.isAdmin(currentUser);
-        boolean targetIsUser = user.getRole().getName().equals("USER"); // Using String comparison
-        
+        boolean targetIsUser = user.getRole().getName().equals(Role.RoleType.USER); // Using String comparison
         if (!isSuperAdmin && !(isAdmin && targetIsUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
@@ -125,4 +118,24 @@ public class DepartmentController {
         user.getDepartments().remove(department);
         return ResponseEntity.ok(userRepository.save(user));
     }
+    
+    @GetMapping("/getalldepartments")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    public ResponseEntity<List<Department>> getAllDepartments() {
+        List<Department> departments = departmentRepository.findAll();
+        return ResponseEntity.ok(departments);
+    }
+
+
+    // Add to DepartmentController.java
+    private final DepartmentService departmentService;
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPERADMIN')")
+    public ResponseEntity<Page<DepartmentListDTO>> getAllDepartments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(departmentService.getAllDepartments(pageable));
+    }
 }
+

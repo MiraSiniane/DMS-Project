@@ -1,0 +1,54 @@
+/* src/components/Navbar.css */
+.navbar {
+  position: fixed;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  width: 100%;
+  align-self: center;
+  
+}
+
+.navbar-container {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  color: #9296ec;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.navbar-logout {
+  background-color: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.navbar-logout:hover {
+  color: #fff;
+  border-color: #9296ec;
+}
+
+/* Add these to your existing Navbar.css */
+.menu-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 1rem;
+}
+
+.menu-btn:hover {
+  color: #fff;
+}

@@ -13,6 +13,7 @@ import com.example.auth_service.util.RoleUtils;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -32,6 +36,8 @@ public class AuthController {
     private final UserRepository userRepository; 
     private final RoleRepository roleRepository; 
     private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
@@ -80,8 +86,6 @@ public class AuthController {
         if (!isAdmin(adminUser)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can create users");
         }
-        // Force role=USER for admin-created users
-        request.setRole("USER");
         return ResponseEntity.ok(authService.signup(request));
     }
 
@@ -133,5 +137,56 @@ public class AuthController {
         
         return ResponseEntity.ok("User password changed successfully");
     }
+
+
+    // Add these endpoints to your existing AuthController
+    @GetMapping("/user-info")
+    public ResponseEntity<User> getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        
+        // Make sure to include all necessary user fields
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/update-status")
+    public ResponseEntity<String> updateUserStatus(
+        @RequestBody Map<String, String> requestBody, // Changed from @RequestParam
+        @AuthenticationPrincipal UserDetails userDetails) {
+        
+        String status = requestBody.get("status");
+        if (status == null || !(status.equals("active") || status.equals("inactive"))) {
+            return ResponseEntity.badRequest().body("Invalid status value");
+        }
+
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        
+        user.setStatus(status);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok("Status updated");
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<String> updatePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody PasswordChangeDTO passwordChange) {
+        
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        
+        // Verify old password
+        if (!passwordEncoder.matches(passwordChange.getOldPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incorrect old password");
+        }
+        
+        user.setPassword(passwordEncoder.encode(passwordChange.getNewPassword()));
+        userRepository.save(user);
+        
+        return ResponseEntity.ok("Password updated successfully");
+    }
+
+    
        
 }
