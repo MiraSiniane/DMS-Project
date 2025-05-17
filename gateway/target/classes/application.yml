@@ -1,0 +1,35 @@
+server:
+  port: 8088
+
+# Temporarily comment or disable this for local testing:
+# spring.security.oauth2.resourceserver.jwt.jwk-set-uri=...
+
+# Or explicitly disable security with this property:
+spring:
+# spring:
+#   security:
+#     oauth2:
+#       resourceserver:
+#         jwt:
+#           jwk-set-uri: http://localhost:8082/.well-known/jwks.json
+
+
+
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: document-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/documents/**
+          filters:
+            - AddResponseHeader=X-Served-By, Spring-Gateway
+
+        - id: storage-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/storage/**
+          filters:
+            - AddResponseHeader=X-Served-By, Spring-Gateway

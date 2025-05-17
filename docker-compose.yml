@@ -1,0 +1,118 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: backend-postgres
+    environment:
+      POSTGRES_DB: entreprise_dms
+      POSTGRES_USER: entreprise_dms
+      POSTGRES_PASSWORD: hanalynamira
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U entreprise_dms -d entreprise_dms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend-network
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    image: backend-auth-service:latest
+    container_name: backend-auth-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: "dev"
+      SERVER_PORT: "8084"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/entreprise_dms"
+      SPRING_DATASOURCE_USERNAME: "entreprise_dms"
+      SPRING_DATASOURCE_PASSWORD: "hanalynamira"
+    networks:
+      - backend-network
+
+  storage-service:
+    build:
+      context: .
+      dockerfile: storage-service/Dockerfile
+    image: backend-storage-service:latest
+    container_name: backend-storage-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: "dev"
+      SERVER_PORT: "8083"
+    networks:
+      - backend-network
+
+  document-service:
+    build:
+      context: .
+      dockerfile: document-service/Dockerfile
+    image: backend-document-service:latest
+    container_name: backend-document-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      storage-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: "dev"
+      SERVER_PORT: "8082"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/entreprise_dms"
+      SPRING_DATASOURCE_USERNAME: "entreprise_dms"
+      SPRING_DATASOURCE_PASSWORD: "hanalynamira"
+      APP_SERVICES_AUTH_URL: "http://auth-service:8084"
+      APP_SERVICES_STORAGE_URL: "http://storage-service:8083"
+    networks:
+      - backend-network
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    image: backend-gateway-service:latest
+    container_name: backend-gateway
+    ports:
+      - "8088:8088"
+    depends_on:
+      auth-service:
+        condition: service_started
+      storage-service:
+        condition: service_started
+      document-service:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: "active"
+      SERVER_PORT: "8088"
+      "spring.cloud.gateway.routes[0].id": "auth"
+      "spring.cloud.gateway.routes[0].uri": "http://auth-service:8084"
+      "spring.cloud.gateway.routes[0].predicates[0]": "Path=/api/auth/**"
+      "spring.cloud.gateway.routes[1].id": "storage"
+      "spring.cloud.gateway.routes[1].uri": "http://storage-service:8083"
+      "spring.cloud.gateway.routes[1].predicates[0]": "Path=/api/storage/**"
+      "spring.cloud.gateway.routes[2].id": "document"
+      "spring.cloud.gateway.routes[2].uri": "http://document-service:8082"
+      "spring.cloud.gateway.routes[2].predicates[0]": "Path=/api/documents/**"
+    networks:
+      - backend-network
+
+volumes:
+  postgres_data:
+
+networks:
+  backend-network:
+    driver: bridge

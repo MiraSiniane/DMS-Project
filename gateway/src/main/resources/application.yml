@@ -1,0 +1,42 @@
+server:
+  port: 8088
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: document-service
+          uri: http://document-service:8082  # Use service name instead of localhost
+          predicates:
+            - Path=/api/documents/**
+          filters:
+            - AddResponseHeader=X-Served-By, Spring-Gateway
+            - RewritePath=/api/documents/(?<segment>.*), /$\{segment}  # Remove /api/documents prefix
+
+        - id: storage-service
+          uri: http://storage-service:8083  # Use service name instead of localhost
+          predicates:
+            - Path=/api/storage/**
+          filters:
+            - AddResponseHeader=X-Served-By, Spring-Gateway
+            - RewritePath=/api/storage/(?<segment>.*), /$\{segment}  # Remove /api/storage prefix
+
+        - id: auth-service
+          uri: http://auth-service:8084  # Use service name instead of localhost
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - AddResponseHeader=X-Served-By, Spring-Gateway
+            - RewritePath=/api/auth/(?<segment>.*), /$\{segment}  # Remove /api/auth prefix
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          enabled: false  # Disable security for local testing
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

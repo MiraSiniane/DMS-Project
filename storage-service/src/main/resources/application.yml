@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: storage-service
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+aws:
+  accessKey: minioadmin
+  secretKey: minioadmin
+  s3:
+    endpoint: http://minio:9000  # Internal endpoint for S3Client
+    external:
+      endpoint: http://localhost:9000  # External endpoint for S3Presigner
+    region: us-east-1
+    bucket: dms-documents
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info   # now /actuator/health exists
