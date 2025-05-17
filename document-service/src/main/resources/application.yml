@@ -1,0 +1,60 @@
+server:
+  port: 8082
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+   
+
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/entreprise_dms
+    username: entreprise_dms
+    password: hanalynamira
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 10000
+      connection-test-query: SELECT 1
+  sql:
+    init:
+      mode: never
+    
+
+  jpa:
+    properties:
+      jakarta.persistence:
+        validation.mode: none
+      hibernate:
+        temp.use_jdbc_metadata_defaults: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      missing-topics-fatal: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8084/issuer
+          jwk-set-uri: http://localhost:8084/.well-known/jwks.json
+
+app:
+  services:
+    auth:
+      url: http://auth-service:8084
+    storage:
+      url: http://storage-service:8083
+      enabled: true
+  
+
+logging:
+  level:
+    org.springframework: INFO
+    com.service.document: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.zaxxer.hikari: DEBUG
